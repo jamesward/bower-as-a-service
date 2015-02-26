@@ -13,8 +13,13 @@ app.get("/search", function(req, res) {
   });
 });
 
-app.get("/info/:package", function(req, res) {
-  bower.commands.info(req.params.package).on("end", function(data) {
+app.get("/info/:package/:version?", function(req, res) {
+  var endpoint = req.params.package;
+  if (req.params.version !== undefined) {
+    endpoint += "#" + req.params.version;
+  }
+
+  bower.commands.info(endpoint).on("end", function(data) {
     res.json(data);
   });
 });
