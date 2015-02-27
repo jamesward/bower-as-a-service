@@ -19,9 +19,13 @@ app.get("/info/:package/:version?", function(req, res) {
     endpoint += "#" + req.params.version;
   }
 
-  bower.commands.info(endpoint).on("end", function(data) {
-    res.json(data);
-  });
+  bower.commands.info(endpoint)
+    .on("end", function (data) {
+      res.json(data);
+    })
+    .on("error", function(data) {
+      res.status(500).send(data);
+    });
 });
 
 app.get("/download/:package/:version?", function(req, res) {
@@ -35,28 +39,31 @@ app.get("/download/:package/:version?", function(req, res) {
       endpoint += "#" + req.params.version;
     }
 
-    bower.commands.install([endpoint], {}, {cwd: tmpDir}).on("end", function(data) {
-      var dir = data[packageName].canonicalDir;
+    bower.commands.install([endpoint], {}, {cwd: tmpDir})
+      .on("end", function (data) {
+        var dir = data[packageName].canonicalDir;
 
-      var archive = archiver("zip");
+        var archive = archiver("zip");
 
-      archive.on("error", function(err) {
-        res.status(500).send({error: err.message});
+        archive.on("error", function (err) {
+          return res.status(500).send({error: err.message}).end();
+        });
+
+        res.on("close", function () {
+          return res.status(200).send("OK").end();
+        });
+
+        res.attachment(packageName + ".zip");
+
+        archive.pipe(res);
+
+        archive.directory(dir, false);
+
+        archive.finalize();
+      })
+      .on("error", function (data) {
+        res.status(500).send(data).end();
       });
-
-      res.on("close", function() {
-        console.log("Archive wrote %d bytes", archive.pointer());
-        return res.status(200).send("OK").end();
-      });
-
-      res.attachment(packageName + ".zip");
-
-      archive.pipe(res);
-
-      archive.directory(dir, false);
-
-      archive.finalize();
-    });
   });
 });
 
