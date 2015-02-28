@@ -2,6 +2,10 @@ var express = require("express");
 var bower = require("bower");
 var tmp = require("tmp");
 var archiver = require("archiver");
+var endpointParser = require("bower-endpoint-parser");
+var PackageRepository = require("bower/lib/core/PackageRepository");
+var defaultConfig = require("bower/lib/config");
+var Logger = require('bower-logger');
 
 var app = express();
 
@@ -13,31 +17,26 @@ app.get("/search", function(req, res) {
   });
 });
 
-app.get("/info/:package/:version?", function(req, res) {
-  var endpoint = req.params.package;
-  if (req.params.version !== undefined) {
-    endpoint += "#" + req.params.version;
-  }
+app.get("/info/:package/:version", function(req, res) {
+  var endpoint = req.params.package + "#" + req.params.version;
 
-  bower.commands.info(endpoint)
-    .on("end", function (data) {
-      res.json(data);
-    })
-    .on("error", function(data) {
-      res.status(500).send(data);
-    });
+  var logger = new Logger();
+  var decEndpoint = endpointParser.decompose(endpoint);
+  var config = defaultConfig();
+  var repository = new PackageRepository(config, logger);
+
+  repository.fetch(decEndpoint).spread(function (canonicalDir, pkgMeta) {
+    res.json(pkgMeta).end();
+  });
 });
 
-app.get("/download/:package/:version?", function(req, res) {
+app.get("/download/:package/:version", function(req, res) {
   tmp.dir({"unsafeCleanup": true}, function(err, tmpDir) {
     if (err) throw err;
 
     var packageName = req.params.package;
 
-    var endpoint = packageName;
-    if (req.params.version !== undefined) {
-      endpoint += "#" + req.params.version;
-    }
+    var endpoint = packageName + "#" + req.params.version;
 
     bower.commands.install([endpoint], {}, {cwd: tmpDir})
       .on("end", function (data) {
