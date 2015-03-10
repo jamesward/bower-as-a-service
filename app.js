@@ -25,9 +25,13 @@ app.get("/info/:package/:version", function(req, res) {
   var config = defaultConfig();
   var repository = new PackageRepository(config, logger);
 
-  repository.fetch(decEndpoint).spread(function (canonicalDir, pkgMeta) {
-    res.json(pkgMeta).end();
-  });
+  repository.fetch(decEndpoint)
+    .spread(function (canonicalDir, pkgMeta) {
+      res.json(pkgMeta).end();
+    })
+    .fail(function(error) {
+      res.status(500).send({error: error});
+    });
 });
 
 app.get("/download/:package/:version", function(req, res) {
