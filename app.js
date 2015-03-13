@@ -17,6 +17,16 @@ app.get("/search", function(req, res) {
   });
 });
 
+app.get("/info/:package", function(req, res) {
+  bower.commands.info(req.params.package)
+    .on("end", function (data) {
+      res.json(data).end();
+    })
+    .on("error", function (data) {
+      res.status(500).send(data).end();
+    });
+});
+
 app.get("/info/:package/:version", function(req, res) {
   var endpoint = req.params.package + "#" + req.params.version;
 
