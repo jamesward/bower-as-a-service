@@ -62,10 +62,6 @@ app.get("/download/:package/:version", function(req, res) {
           return res.status(500).send({error: err.message}).end();
         });
 
-        res.on("close", function () {
-          return res.status(200).send("OK").end();
-        });
-
         res.attachment(packageName + ".zip");
 
         archive.pipe(res);
