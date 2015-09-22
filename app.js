@@ -52,7 +52,7 @@ app.get("/download/:package/:version", function(req, res) {
 
     var endpoint = packageName + "#" + req.params.version;
 
-    bower.commands.install([endpoint], {}, {cwd: tmpDir})
+    bower.commands.install([endpoint], {forceLatest: true}, {cwd: tmpDir})
       .on("end", function (data) {
         var dir = data[packageName].canonicalDir;
 
