@@ -13,7 +13,7 @@ app.set("port", (process.env.PORT || 5000));
 
 app.get("/search", function(req, res) {
   bower.commands.search().on("end", function(data) {
-    res.json(data);
+    res.json(data).end();
   });
 });
 
@@ -40,7 +40,7 @@ app.get("/info/:package/:version", function(req, res) {
       res.json(pkgMeta).end();
     })
     .fail(function(error) {
-      res.status(500).send({error: error});
+      res.status(500).send({error: error}).end();
     });
 });
 
@@ -49,26 +49,34 @@ app.get("/download/:package/:version", function(req, res) {
     if (err) throw err;
 
     var packageName = req.params.package;
-
     var endpoint = packageName + "#" + req.params.version;
 
-    bower.commands.install([endpoint], {forceLatest: true}, {cwd: tmpDir})
+    bower.commands.info(endpoint)
       .on("end", function (data) {
-        var dir = data[packageName].canonicalDir;
+        // use the canonical name
+        packageName = data.name;
 
-        var archive = archiver("zip");
+        bower.commands.install([endpoint], {forceLatest: true}, {cwd: tmpDir})
+          .on("end", function (data) {
+            var dir = data[packageName].canonicalDir;
 
-        archive.on("error", function (err) {
-          return res.status(500).send({error: err.message}).end();
-        });
+            var archive = archiver("zip");
 
-        res.attachment(packageName + ".zip");
+            archive.on("error", function (err) {
+              res.status(500).send({error: err.message}).end();
+            });
 
-        archive.pipe(res);
+            res.attachment(packageName + ".zip");
 
-        archive.directory(dir, false);
+            archive.pipe(res);
 
-        archive.finalize();
+            archive.directory(dir, false);
+
+            archive.finalize();
+          })
+          .on("error", function (data) {
+            res.status(500).send(data).end();
+          });
       })
       .on("error", function (data) {
         res.status(500).send(data).end();
