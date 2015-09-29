@@ -1,23 +1,20 @@
 var express = require("express");
-var bower = require("bower");
-var tmp = require("tmp");
-var archiver = require("archiver");
-var endpointParser = require("bower-endpoint-parser");
-var PackageRepository = require("bower/lib/core/PackageRepository");
-var defaultConfig = require("bower/lib/config");
-var Logger = require('bower-logger');
 
 var app = express();
 
 app.set("port", (process.env.PORT || 5000));
 
 app.get("/search", function(req, res) {
+  var bower = require("bower");
+
   bower.commands.search().on("end", function(data) {
     res.json(data).end();
   });
 });
 
 app.get("/info/:package", function(req, res) {
+  var bower = require("bower");
+
   bower.commands.info(req.params.package)
     .on("end", function (data) {
       res.json(data).end();
@@ -29,6 +26,12 @@ app.get("/info/:package", function(req, res) {
 
 app.get("/info/:package/:version", function(req, res) {
   var endpoint = req.params.package + "#" + req.params.version;
+
+  var bower = require("bower");
+  var endpointParser = require("bower-endpoint-parser");
+  var PackageRepository = require("bower/lib/core/PackageRepository");
+  var defaultConfig = require("bower/lib/config");
+  var Logger = require('bower-logger');
 
   var logger = new Logger();
   var decEndpoint = endpointParser.decompose(endpoint);
@@ -42,9 +45,14 @@ app.get("/info/:package/:version", function(req, res) {
     .fail(function(error) {
       res.status(500).send({error: error}).end();
     });
+
 });
 
 app.get("/download/:package/:version", function(req, res) {
+  var bower = require("bower");
+  var tmp = require("tmp");
+  var archiver = require("archiver");
+
   tmp.dir({"unsafeCleanup": true}, function(err, tmpDir) {
     if (err) throw err;
 
