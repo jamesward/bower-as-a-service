@@ -1,24 +1,24 @@
 {
   "name": "bower-as-a-service",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Bower as a Service",
   "main": "app.js",
   "scripts": {
     "start": "node node_modules/nodemon/bin/nodemon.js app.js"
   },
   "dependencies": {
-    "bower": "1.5.2",
+    "bower": "1.6.5",
     "bower-endpoint-parser": "0.2.2",
     "bower-logger": "0.2.2",
     "express": "4.13.3",
-    "tmp": "0.0.27",
-    "archiver": "0.15.1"
+    "tmp": "0.0.28",
+    "archiver": "0.16.0"
   },
   "devDependencies": {
-    "nodemon": "1.7.0"
+    "nodemon": "1.8.0"
   },
   "engines": {
-    "node": "0.12.2"
+    "node": "4.2.1"
   },
   "repository": {
     "type": "git",
