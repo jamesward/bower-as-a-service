@@ -7,12 +7,14 @@
     "start": "node node_modules/nodemon/bin/nodemon.js app.js"
   },
   "dependencies": {
-    "bower": "1.6.5",
-    "bower-endpoint-parser": "0.2.2",
-    "bower-logger": "0.2.2",
-    "express": "4.13.3",
-    "tmp": "0.0.28",
-    "archiver": "0.16.0"
+    "bower": "^1.7.2",
+    "bower-endpoint-parser": "^0.2.2",
+    "bower-logger": "^0.2.2",
+    "express": "^4.13.3",
+    "tmp": "^0.0.28",
+    "archiver": "^0.21.0",
+    "node-cache": "^3.0.1",
+    "q": "^1.1.2"
   },
   "devDependencies": {
     "nodemon": "1.8.0"

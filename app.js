@@ -1,4 +1,9 @@
 var express = require("express");
+var NodeCache = require( "node-cache" );
+var cache = new NodeCache({ stdTTL: 60, checkperiod: 120, useClones: false });
+var Q = require("q");
+var Logger = require('bower-logger');
+var logger = new Logger();
 
 var app = express();
 
@@ -6,90 +11,115 @@ app.set("port", (process.env.PORT || 5000));
 
 app.get("/search", function(req, res) {
   var bower = require("bower");
-
   bower.commands.search().on("end", function(data) {
     res.json(data).end();
   });
 });
 
-app.get("/info/:package", function(req, res) {
-  var bower = require("bower");
 
-  bower.commands.info(req.params.package)
-    .on("end", function (data) {
-      res.json(data).end();
-    })
-    .on("error", function (data) {
-      res.status(500).send(data).end();
-    });
-});
+function fetchBasicBowerInfo(packageName) {
+  var info = require("bower/lib/commands/info");
+  return info(logger, packageName);
+}
 
-app.get("/info/:package/:version", function(req, res) {
-  var endpoint = req.params.package + "#" + req.params.version;
+function fetchDetailedBowerInfo(packageName, version) {
+  var endpoint = packageName + "#" + version;
 
-  var bower = require("bower");
   var endpointParser = require("bower-endpoint-parser");
   var PackageRepository = require("bower/lib/core/PackageRepository");
   var defaultConfig = require("bower/lib/config");
-  var Logger = require('bower-logger');
 
-  var logger = new Logger();
   var decEndpoint = endpointParser.decompose(endpoint);
   var config = defaultConfig();
   var repository = new PackageRepository(config, logger);
 
-  repository.fetch(decEndpoint)
-    .spread(function (canonicalDir, pkgMeta) {
-      res.json(pkgMeta).end();
-    })
-    .fail(function(error) {
-      res.status(500).send({error: error}).end();
-    });
+  return repository.fetch(decEndpoint).spread(function (canonicalDir, pkgMeta) {
+    return pkgMeta;
+  });
+}
 
+function fetchBowerInfo(packageName, version) {
+  return (version == undefined) ? fetchBasicBowerInfo(packageName) : fetchDetailedBowerInfo(packageName, version);
+}
+
+function getBowerInfo(packageName, version) {
+  var endpoint = packageName + "#" + version;
+  var cacheKey = "info:" + endpoint;
+  var maybeInfoPromise = cache.get(cacheKey);
+  if (maybeInfoPromise != undefined) {
+    return maybeInfoPromise;
+  }
+  else {
+    var bowerInfoPromise = fetchBowerInfo(packageName, version);
+    bowerInfoPromise.catch(function() {
+      cache.del(cacheKey);
+    });
+    cache.set(cacheKey, bowerInfoPromise);
+    return bowerInfoPromise;
+  }
+}
+
+app.get("/info/:package/:version?", function(req, res) {
+  getBowerInfo(req.params.package, req.params.version)
+    .then(function(data) {
+      res.json(data).end();
+    })
+    .catch(function(error) {
+      res.status(500).send(error).end();
+    });
 });
 
-app.get("/download/:package/:version", function(req, res) {
-  var bower = require("bower");
+
+function fetchBowerDownload(packageName, version) {
   var tmp = require("tmp");
-  var archiver = require("archiver");
 
-  tmp.dir({"unsafeCleanup": true}, function(err, tmpDir) {
-    if (err) throw err;
-
-    var packageName = req.params.package;
-    var endpoint = packageName + "#" + req.params.version;
-
-    bower.commands.info(endpoint)
-      .on("end", function (data) {
-        // use the canonical name
-        packageName = data.name;
-
-        bower.commands.install([endpoint], {forceLatest: true}, {cwd: tmpDir})
-          .on("end", function (data) {
-            var dir = data[packageName].canonicalDir;
-
-            var archive = archiver("zip");
-
-            archive.on("error", function (err) {
-              res.status(500).send({error: err.message}).end();
-            });
-
-            res.attachment(packageName + ".zip");
-
-            archive.pipe(res);
-
-            archive.directory(dir, false);
-
-            archive.finalize();
-          })
-          .on("error", function (data) {
-            res.status(500).send(data).end();
-          });
-      })
-      .on("error", function (data) {
-        res.status(500).send(data).end();
-      });
+  return Q.nfcall(tmp.dir, {"unsafeCleanup": true}).spread(function(tmpDir) {
+    var endpoint = packageName + "#" + version;
+    var install = require("bower/lib/commands/install");
+    return install(logger, [endpoint], {forceLatest: true, production: true}, {cwd: tmpDir});
   });
+}
+
+function getBowerDownload(packageName, version) {
+  var endpoint = packageName + "#" + version;
+  var cacheKey = "download:" + endpoint;
+  var maybeDownloadPromise = cache.get(cacheKey);
+  if (maybeDownloadPromise != undefined) {
+    return maybeDownloadPromise;
+  }
+  else {
+    var downloadPromise = fetchBowerDownload(packageName, version);
+    downloadPromise.catch(function() {
+      cache.del(cacheKey);
+    });
+    cache.set(cacheKey, downloadPromise);
+    return downloadPromise;
+  }
+}
+
+app.get("/download/:package/:version", function(req, res) {
+  var packageName = req.params.package;
+  var version = req.params.version;
+
+  getBowerDownload(packageName, version)
+    .then(function(data) {
+      var dir = data[packageName].canonicalDir;
+      var archiver = require("archiver");
+      var archive = archiver("zip");
+      archive.directory(dir, false);
+
+      archive.on("error", function (err) {
+        res.status(500).send({error: err.message}).end();
+      });
+
+      res.attachment(packageName + ".zip");
+
+      archive.pipe(res);
+      archive.finalize();
+    })
+    .catch(function (error) {
+      res.status(500).send(error).end();
+    });
 });
 
 app.listen(app.get("port"), function() {
