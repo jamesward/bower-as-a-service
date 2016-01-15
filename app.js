@@ -101,21 +101,24 @@ app.get("/download/:package/:version", function(req, res) {
   var packageName = req.params.package;
   var version = req.params.version;
 
-  getBowerDownload(packageName, version)
-    .then(function(data) {
-      var dir = data[packageName].canonicalDir;
-      var archiver = require("archiver");
-      var archive = archiver("zip");
-      archive.directory(dir, false);
+  getBowerInfo(packageName, version).then(function(packageInfo) {
+    packageName = packageInfo.name;
+    return getBowerDownload(packageName, version)
+      .then(function (installInfo) {
+        var dir = installInfo[packageName].canonicalDir;
+        var archiver = require("archiver");
+        var archive = archiver("zip");
+        archive.directory(dir, false);
 
-      archive.on("error", function (err) {
-        res.status(500).send({error: err.message}).end();
-      });
+        archive.on("error", function (err) {
+          res.status(500).send({error: err.message}).end();
+        });
 
-      res.attachment(packageName + ".zip");
+        res.attachment(packageName + ".zip");
 
-      archive.pipe(res);
-      archive.finalize();
+        archive.pipe(res);
+        archive.finalize();
+      })
     })
     .catch(function (error) {
       res.status(500).send(error).end();
