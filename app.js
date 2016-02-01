@@ -102,10 +102,10 @@ app.get("/download/:package/:version", function(req, res) {
   var version = req.params.version;
 
   getBowerInfo(packageName, version).then(function(packageInfo) {
-    packageName = packageInfo.name;
     return getBowerDownload(packageName, version)
       .then(function (installInfo) {
-        var dir = installInfo[packageName].canonicalDir;
+        // the installInfo uses the metadata name
+        var dir = installInfo[packageInfo.name].canonicalDir;
         var archiver = require("archiver");
         var archive = archiver("zip");
         archive.directory(dir, false);
