@@ -4,20 +4,24 @@
   "description": "Bower as a Service",
   "main": "app.js",
   "scripts": {
-    "start": "node node_modules/nodemon/bin/nodemon.js app.js"
+    "start": "node node_modules/nodemon/bin/nodemon.js app.js",
+    "test": "mocha -R spec test.js"
   },
   "dependencies": {
-    "bower": "^1.7.2",
-    "bower-endpoint-parser": "^0.2.2",
-    "bower-logger": "^0.2.2",
-    "express": "^4.13.3",
-    "tmp": "^0.0.28",
-    "archiver": "^0.21.0",
-    "node-cache": "^3.0.1",
-    "q": "^1.1.2"
+    "bower": "1.7.9",
+    "bower-endpoint-parser": "0.2.2",
+    "bower-logger": "0.2.2",
+    "express": "4.14.0",
+    "tmp": "0.0.28",
+    "archiver": "1.0.0",
+    "node-cache": "3.2.1",
+    "q": "1.4.1"
   },
   "devDependencies": {
-    "nodemon": "1.8.0"
+    "nodemon": "latest",
+    "npm-check-updates": "latest",
+    "mocha": "latest",
+    "supertest": "latest"
   },
   "engines": {
     "node": "4.2.1"
