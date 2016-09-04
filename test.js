@@ -2,29 +2,30 @@ var app = require('./app');
 var request = require('supertest');
 
 describe('app', function () {
-  it('/', function() {
+  this.timeout(60000);
+  it('/', function(done) {
     request(app)
       .get('/')
-      .expect(404);
+      .expect(404)
+      .end(done);
   });
-  it('/search', function() {
-    request(app)
-      .get('/search')
-      .expect(200);
-  });
-  it('/info/:package', function() {
+  it('/info/:package', function(done) {
     request(app)
       .get('/info/jquery')
-      .expect(200);
+      .expect(200)
+      .end(done);
   });
-  it('/info/:package/:version', function() {
+  it('/info/:package/:version', function(done) {
     request(app)
       .get('/info/jquery/1.9.0')
-      .expect(200);
+      .expect(200)
+      .end(done);
   });
-  it('/download/:package/:version', function() {
+  it('/download/:package/:version', function(done) {
     request(app)
       .get('/download/jquery/1.9.0')
-      .expect(200);
+      .expect(200)
+      .expect('Content-Type', 'application/zip')
+      .end(done);
   });
 });
