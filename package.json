@@ -24,7 +24,7 @@
     "supertest": "latest"
   },
   "engines": {
-    "node": "4.2.1"
+    "node": "6.5.0"
   },
   "repository": {
     "type": "git",
