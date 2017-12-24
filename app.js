@@ -66,6 +66,17 @@ app.get('/info/:package/:version?', function(req, res) {
     });
 });
 
+app.get('/lookup/:name', function(req, res) {
+  var lookup = require('bower/lib/commands/lookup');
+  lookup(logger, req.params.name)
+    .then(function(data) {
+      res.json(data).end();
+    })
+    .catch(function(error) {
+      res.status(500).send(error).end();
+    });
+});
+
 function packageDir(packageName, version) {
   return path.join(tmpDir, packageName, version);
 }

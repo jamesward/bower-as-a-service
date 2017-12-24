@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node node_modules/nodemon/bin/nodemon.js app.js",
-    "test": "mocha -R spec test.js",
+    "test": "mocha -R spec --exit test.js",
     "ncu": "node node_modules/npm-check-updates/bin/ncu -u"
   },
   "dependencies": {

@@ -1,7 +1,7 @@
 var app = require('./app');
 var request = require('supertest');
 
-describe('app', function () {
+describe('app', function() {
   this.timeout(60000);
   it('/', function(done) {
     request(app)
@@ -26,6 +26,13 @@ describe('app', function () {
       .get('/download/jquery/1.9.0')
       .expect(200)
       .expect('Content-Type', 'application/zip')
+      .end(done);
+  });
+  it('/lookup/:name', function(done) {
+    request(app)
+      .get('/lookup/jquery')
+      .expect(200)
+      .expect({name: 'jquery', url: 'https://github.com/jquery/jquery-dist.git' })
       .end(done);
   });
 });
