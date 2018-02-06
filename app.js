@@ -70,7 +70,12 @@ app.get('/lookup/:name', function(req, res) {
   var lookup = require('bower/lib/commands/lookup');
   lookup(logger, req.params.name)
     .then(function(data) {
-      res.json(data).end();
+      if (data == null) {
+        res.status(404).end();
+      }
+      else {
+        res.json(data).end();
+      }
     })
     .catch(function(error) {
       res.status(500).send(error).end();

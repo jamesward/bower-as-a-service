@@ -35,4 +35,11 @@ describe('app', function() {
       .expect({name: 'jquery', url: 'https://github.com/jquery/jquery-dist.git' })
       .end(done);
   });
+
+  it('/lookup/KaTeX', function(done) {
+    request(app)
+      .get('/lookup/KaTeX')
+      .expect(404)
+      .end(done);
+  });
 });
