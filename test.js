@@ -1,5 +1,6 @@
-var app = require('./app');
-var request = require('supertest');
+const app = require('./app');
+const request = require('supertest');
+const assert = require('assert');
 
 describe('app', function() {
   this.timeout(60000);
@@ -19,6 +20,9 @@ describe('app', function() {
     request(app)
       .get('/info/jquery/1.9.0')
       .expect(200)
+      .expect(function(res) {
+        assert(res.body.license, "MIT")
+      })
       .end(done);
   });
   it('/download/:package/:version', function(done) {
