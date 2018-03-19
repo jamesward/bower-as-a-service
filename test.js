@@ -18,10 +18,10 @@ describe('app', function() {
   });
   it('/info/:package/:version', function(done) {
     request(app)
-      .get('/info/jquery/1.9.0')
+      .get('/info/swagger-ui/3.13.0')
       .expect(200)
       .expect(function(res) {
-        assert(res.body.license, "MIT")
+        assert(res.body.license, "Apache-2.0")
       })
       .end(done);
   });

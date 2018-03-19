@@ -6,6 +6,7 @@ const cache = new NodeCache({ stdTTL: 60, checkperiod: 120, useClones: false });
 const Q = require('q');
 const Logger = require('bower-logger');
 const logger = new Logger();
+const util = require('util');
 
 const app = express();
 
@@ -31,9 +32,21 @@ function fetchDetailedBowerInfo(packageName, version) {
   const repository = new PackageRepository(config, logger);
 
   return repository.fetch(decEndpoint).spread(function (canonicalDir, pkgMeta) {
-    const Project = require('bower/lib/core/Project');
-    const project = new Project(config);
-    return project.getJson().then(function (json) {
+
+    const bowerJsonFile = path.join(canonicalDir, 'bower.json');
+    const packageJsonFile = path.join(canonicalDir, 'package.json');
+
+    return util.promisify(fs.readFile)(bowerJsonFile).catch(function() {
+      // fall back to the package.json
+      return util.promisify(fs.readFile)(packageJsonFile);
+    })
+    .then(function (buffer) {
+      return JSON.parse(buffer.toString());
+    })
+    .catch(function() {
+      return {};
+    })
+    .then(function (json) {
       return Object.assign({}, json, pkgMeta);
     });
   });
