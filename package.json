@@ -14,6 +14,7 @@
     "bower-endpoint-parser": "0.2.2",
     "bower-logger": "0.2.2",
     "express": "4.16.3",
+    "body-parser": "1.18.2",
     "node-cache": "4.1.1",
     "q": "1.5.1",
     "tmp": "0.0.33"
