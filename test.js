@@ -38,6 +38,13 @@ describe('app', function() {
       .expect('Content-Type', 'application/zip')
       .end(done);
   });
+  it('/download/:package/:version again', function(done) {
+    request(app)
+      .get('/download/jquery/1.9.0')
+      .expect(200)
+      .expect('Content-Type', 'application/zip')
+      .end(done);
+  });
   it('/lookup/:name', function(done) {
     request(app)
       .get('/lookup/jquery')

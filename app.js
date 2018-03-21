@@ -107,7 +107,7 @@ function fetchBowerDownload(packageInfoName, packageName, version) {
   const actualPackageDir = path.join(packageDir(packageName, version), 'bower_components', packageInfoName);
   return util.promisify(fs.stat)(actualPackageDir).then(function(fileStat) {
     if (fileStat.isDirectory()) {
-      return Promise.accept(actualPackageDir);
+      return Promise.resolve(actualPackageDir);
     }
     else {
       return Promise.reject(new Error("Package not downloaded"));
