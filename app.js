@@ -104,25 +104,22 @@ function packageDir(packageName, version) {
 }
 
 function fetchBowerDownload(packageInfoName, packageName, version) {
-  const packageDownloaded = false;
   const actualPackageDir = path.join(packageDir(packageName, version), 'bower_components', packageInfoName);
-  try {
-    packageDownloaded = fs.statSync(actualPackageDir).isDirectory();
-  }
-  catch (error) {
-    // ignored
-  }
-
-  if (packageDownloaded) {
-    return Q.resolve(actualPackageDir);
-  }
-  else {
+  return util.promisify(fs.stat)(actualPackageDir).then(function(fileStat) {
+    if (fileStat.isDirectory()) {
+      return Promise.accept(actualPackageDir);
+    }
+    else {
+      return Promise.reject(new Error("Package not downloaded"));
+    }
+  })
+  .catch(function() {
     const endpoint = packageName + '#' + version;
     const install = require('bower/lib/commands/install');
     return install(logger, [endpoint], {forceLatest: true, production: true}, {cwd: packageDir(packageName, version)}).then(function(installInfo) {
       return installInfo[packageInfoName].canonicalDir;
     });
-  }
+  });
 }
 
 app.get('/download/:package/:version', function(req, res) {

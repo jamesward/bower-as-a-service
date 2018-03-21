@@ -25,6 +25,12 @@ describe('app', function() {
       })
       .end(done);
   });
+  it('/info/sjcl/1.0.2', function(done) {
+    request(app)
+      .get('/info/sjcl/1.0.2')
+      .expect(200)
+      .end(done);
+  });
   it('/download/:package/:version', function(done) {
     request(app)
       .get('/download/jquery/1.9.0')
