@@ -55,6 +55,12 @@ describe('app', function() {
       .expect(200)
       .end(done);
   });
+  it('/info?package=https://github.com/jquery/jquery-dist&version=3.2.1', function(done) {
+    request(app)
+      .get('/info?package=https://github.com/jquery/jquery-dist&version=3.2.1')
+      .expect(200)
+      .end(done);
+  });
   it('/download/:package/:version', function(done) {
     request(app)
       .get('/download/jquery/1.9.0')

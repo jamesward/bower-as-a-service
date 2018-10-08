@@ -57,10 +57,7 @@ function fetchBowerInfo(packageName, version) {
 
 function getBowerInfo(packageName, version) {
   // due to a bug in bower
-  const normalizedPackageName1 = packageName.replace('https://', '').replace('http://', '');
-  const normalizedPackageName2 = (normalizedPackageName1.endsWith('.git') && (normalizedPackageName1.indexOf('://') === -1)) ? 'git://' + normalizedPackageName1 : normalizedPackageName1;
-
-  const normalizedPackageName = normalizedPackageName2;
+  const normalizedPackageName = packageName.replace('https://', 'git://').replace('http://', 'git://');
 
   const endpoint = normalizedPackageName + '#' + version;
   const cacheKey = 'info:' + endpoint;
