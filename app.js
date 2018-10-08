@@ -56,14 +56,17 @@ function fetchBowerInfo(packageName, version) {
 }
 
 function getBowerInfo(packageName, version) {
-  const endpoint = packageName + '#' + version;
+  // due to a bug in bower
+  const normalizedPackageName = packageName.replace('https://', '').replace('http://', '');
+
+  const endpoint = normalizedPackageName + '#' + version;
   const cacheKey = 'info:' + endpoint;
   const maybeInfoPromise = cache.get(cacheKey);
   if (maybeInfoPromise !== undefined) {
     return maybeInfoPromise;
   }
   else {
-    const bowerInfoPromise = fetchBowerInfo(packageName, version);
+    const bowerInfoPromise = fetchBowerInfo(normalizedPackageName, version);
     bowerInfoPromise.catch(function() {
       cache.del(cacheKey);
     });
