@@ -3,7 +3,6 @@ const fs = require('fs');
 const express = require('express');
 const NodeCache = require('node-cache');
 const cache = new NodeCache({ stdTTL: 60, checkperiod: 120, useClones: false });
-const Q = require('q');
 const Logger = require('bower-logger');
 const logger = new Logger();
 const util = require('util');
@@ -83,6 +82,16 @@ app.get('/info/:package/:version?', function(req, res) {
     });
 });
 
+app.get('/info', function(req, res) {
+  getBowerInfo(req.query.package, req.query.version)
+    .then(function(data) {
+      res.json(data).end();
+    })
+    .catch(function(error) {
+      res.status(500).send(error).end();
+    });
+});
+
 app.get('/lookup/:name', function(req, res) {
   const lookup = require('bower/lib/commands/lookup');
   lookup(logger, req.params.name)
@@ -122,32 +131,37 @@ function fetchBowerDownload(packageInfoName, packageName, version) {
   });
 }
 
-app.get('/download/:package/:version', function(req, res) {
-  const packageName = req.params.package;
-  const version = req.params.version;
+function download(f) {
+  return function(req, res) {
+    const params = f(req);
+    getBowerInfo(params.package, params.version).then(function (packageInfo) {
+      return fetchBowerDownload(packageInfo.name, params.package, params.version)
+        .then(function (dir) {
+          const archiver = require('archiver');
+          const archive = archiver('zip');
+          archive.directory(dir, false);
 
-  getBowerInfo(packageName, version).then(function(packageInfo) {
-    return fetchBowerDownload(packageInfo.name, packageName, version)
-      .then(function (dir) {
-        const archiver = require('archiver');
-        const archive = archiver('zip');
-        archive.directory(dir, false);
+          archive.on('error', function (err) {
+            res.status(500).send({error: err.message}).end();
+          });
 
-        archive.on('error', function (err) {
-          res.status(500).send({error: err.message}).end();
-        });
+          res.attachment(params.package + '.zip');
 
-        res.attachment(packageName + '.zip');
+          archive.pipe(res);
+          archive.finalize();
+        })
+    })
+    .catch(function (error) {
+      console.error(error);
+      res.status(500).send(error.message).end();
+    });
+  }
+}
 
-        archive.pipe(res);
-        archive.finalize();
-      })
-  })
-  .catch(function (error) {
-    console.error(error);
-    res.status(500).send(error.message).end();
-  });
-});
+app.get('/download/:package/:version', download(req => req.params));
+
+app.get('/download', download(req => req.query));
+
 
 app.listen(app.get('port'), function() {
   console.log('Node app is running at localhost:' + app.get('port'));

@@ -25,6 +25,18 @@ describe('app', function() {
       })
       .end(done);
   });
+  it('/info', function(done) {
+    request(app)
+      .get('/info?package=PolymerElements/iron-behaviors&version=2.0.0')
+      .expect(200)
+      .end(done);
+  });
+  it('/info with range', function(done) {
+    request(app)
+      .get('/info?package=polymerelements/iron-a11y-keys-behavior&version=^1.0.0')
+      .expect(200)
+      .end(done);
+  });
   it('/info/sjcl/1.0.2', function(done) {
     request(app)
       .get('/info/sjcl/1.0.2')
@@ -41,6 +53,13 @@ describe('app', function() {
   it('/download/:package/:version again', function(done) {
     request(app)
       .get('/download/jquery/1.9.0')
+      .expect(200)
+      .expect('Content-Type', 'application/zip')
+      .end(done);
+  });
+  it('/download', function(done) {
+    request(app)
+      .get('/download?package=jquery&version=1.9.0')
       .expect(200)
       .expect('Content-Type', 'application/zip')
       .end(done);
