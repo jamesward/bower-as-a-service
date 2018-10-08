@@ -76,6 +76,13 @@ describe('app', function() {
       .expect('Content-Type', 'application/zip')
       .end(done);
   });
+  it('/download with a url', function(done) {
+    request(app)
+      .get('/download?package=https://github.com/PolymerElements/iron-behaviors&version=2.0.0')
+      .expect(200)
+      .expect('Content-Type', 'application/zip')
+      .end(done);
+  });
   it('/lookup/:name', function(done) {
     request(app)
       .get('/lookup/jquery')

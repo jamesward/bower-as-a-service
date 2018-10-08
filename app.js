@@ -60,7 +60,7 @@ function getBowerInfo(packageName, version) {
   const normalizedPackageName1 = packageName.replace('https://', '').replace('http://', '');
   const normalizedPackageName2 = (normalizedPackageName1.endsWith('.git') && (normalizedPackageName1.indexOf('://') === -1)) ? 'git://' + normalizedPackageName1 : normalizedPackageName1;
 
-  const normalizedPackageName = normalizedPackageName2
+  const normalizedPackageName = normalizedPackageName2;
 
   const endpoint = normalizedPackageName + '#' + version;
   const cacheKey = 'info:' + endpoint;
@@ -141,7 +141,7 @@ function download(f) {
   return function(req, res) {
     const params = f(req);
     getBowerInfo(params.package, params.version).then(function (packageInfo) {
-      return fetchBowerDownload(packageInfo.name, params.package, params.version)
+      return fetchBowerDownload(packageInfo.name, packageInfo._source, packageInfo._target)
         .then(function (dir) {
           const archiver = require('archiver');
           const archive = archiver('zip');
