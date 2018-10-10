@@ -138,7 +138,8 @@ function download(f) {
   return function(req, res) {
     const params = f(req);
     getBowerInfo(params.package, params.version).then(function (packageInfo) {
-      return fetchBowerDownload(packageInfo.name, packageInfo._source, packageInfo._target)
+      const version = packageInfo._target === "*" ? packageInfo._release : packageInfo._target;
+      return fetchBowerDownload(packageInfo.name, packageInfo._source, version)
         .then(function (dir) {
           const archiver = require('archiver');
           const archive = archiver('zip');
