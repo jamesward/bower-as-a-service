@@ -128,7 +128,9 @@ function fetchBowerDownload(packageInfoName, packageName, version) {
   .catch(function() {
     const endpoint = packageName + '#' + version;
     const install = require('bower/lib/commands/install');
-    return install(logger, [endpoint], {forceLatest: true, production: true}, {cwd: packageDir(packageName, version)}).then(function(installInfo) {
+    const options = {forceLatest: true, production: true};
+    const config = {cwd: packageDir(packageName, version), argv: {cooked: []}};
+    return install(logger, [endpoint], options, config).then(function(installInfo) {
       return installInfo[packageInfoName].canonicalDir;
     });
   });

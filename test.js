@@ -89,6 +89,13 @@ describe('app', function() {
       .expect('Content-Type', 'application/zip')
       .end(done);
   });
+  it('/download with with dep version conflicts', function(done) {
+    request(app)
+      .get('/download?package=https://github.com/vaadin/vaadin-grid&version=5.0.5')
+      .expect(200)
+      .expect('Content-Type', 'application/zip')
+      .end(done);
+  });
   it('/lookup/:name', function(done) {
     request(app)
       .get('/lookup/jquery')
