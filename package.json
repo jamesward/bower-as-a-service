@@ -6,18 +6,18 @@
   "scripts": {
     "start": "node node_modules/nodemon/bin/nodemon.js app.js",
     "test": "mocha -R spec --exit test.js",
-    "ncu": "node node_modules/npm-check-updates/bin/ncu -u"
+    "ncu": "node node_modules/npm-check-updates/bin/cli.js -u"
   },
   "dependencies": {
-    "archiver": "3.0.0",
-    "bower": "1.8.4",
+    "archiver": "5.1.0",
+    "bower": "1.8.8",
     "bower-endpoint-parser": "0.2.2",
     "bower-logger": "0.2.2",
-    "express": "4.16.4",
-    "body-parser": "1.18.3",
-    "node-cache": "4.2.0",
+    "express": "4.17.1",
+    "body-parser": "1.19.0",
+    "node-cache": "5.1.2",
     "q": "1.5.1",
-    "tmp": "0.0.33"
+    "tmp": "0.2.1"
   },
   "devDependencies": {
     "mocha": "latest",
@@ -26,8 +26,7 @@
     "supertest": "latest"
   },
   "engines": {
-    "node": "8.2.1",
-    "npm": "6.4.1"
+    "node": "15.4.0"
   },
   "repository": {
     "type": "git",
