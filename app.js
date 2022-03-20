@@ -86,13 +86,18 @@ app.get('/info/:package/:version?', function(req, res) {
 });
 
 app.get('/info', function(req, res) {
-  getBowerInfo(req.query.package, req.query.version)
-    .then(function(data) {
-      res.json(data).end();
-    })
-    .catch(function(error) {
-      res.status(500).send(error).end();
-    });
+  if ((req.query.package !== undefined) && (req.query.package !== null) && (req.query.package.length > 0)) {
+    getBowerInfo(req.query.package, req.query.version)
+        .then(function (data) {
+          res.json(data).end();
+        })
+        .catch(function (error) {
+          res.status(500).send(error).end();
+        });
+  }
+  else {
+    res.status(400).send("package query param not defined")
+  }
 });
 
 app.get('/lookup/:name', function(req, res) {

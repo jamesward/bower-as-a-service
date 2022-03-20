@@ -61,6 +61,18 @@ describe('app', function() {
       .expect(200)
       .end(done);
   });
+  it('/info?package=', function(done) {
+    request(app)
+        .get('/info?package=')
+        .expect(400)
+        .end(done);
+  });
+  it('/info', function(done) {
+    request(app)
+        .get('/info')
+        .expect(400)
+        .end(done);
+  });
   it('/download/:package/:version', function(done) {
     request(app)
       .get('/download/jquery/1.9.0')
