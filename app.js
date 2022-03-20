@@ -56,17 +56,14 @@ function fetchBowerInfo(packageName, version) {
 }
 
 function getBowerInfo(packageName, version) {
-  // due to a bug in bower
-  const normalizedPackageName = packageName.replace('https://', 'git://').replace('http://', 'git://');
-
-  const endpoint = normalizedPackageName + '#' + version;
+  const endpoint = ((version !== undefined) && (version !== null) && (version.length > 0)) ? packageName + '#' + version : packageName;
   const cacheKey = 'info:' + endpoint;
   const maybeInfoPromise = cache.get(cacheKey);
   if (maybeInfoPromise !== undefined) {
     return maybeInfoPromise;
   }
   else {
-    const bowerInfoPromise = fetchBowerInfo(normalizedPackageName, version);
+    const bowerInfoPromise = fetchBowerInfo(packageName, version);
     bowerInfoPromise.catch(function() {
       cache.del(cacheKey);
     });
@@ -92,6 +89,7 @@ app.get('/info', function(req, res) {
           res.json(data).end();
         })
         .catch(function (error) {
+          console.error(error);
           res.status(500).send(error).end();
         });
   }

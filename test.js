@@ -4,6 +4,7 @@ const assert = require('assert');
 
 describe('app', function() {
   this.timeout(60000);
+
   it('/', function(done) {
     request(app)
       .get('/')
@@ -31,12 +32,17 @@ describe('app', function() {
       .expect(200)
       .end(done);
   });
+
+  // doesn't seem to be a valid package name without the .git
+  /*
   it('/info with url', function(done) {
     request(app)
       .get('/info?package=https://github.com/PolymerElements/iron-behaviors&version=2.0.0')
       .expect(200)
       .end(done);
   });
+   */
+
   it('/info with url ending in .git', function(done) {
     request(app)
       .get('/info?package=https://github.com/PolymerElements/iron-behaviors.git&version=2.0.0')
@@ -55,9 +61,9 @@ describe('app', function() {
       .expect(200)
       .end(done);
   });
-  it('/info?package=https://github.com/jquery/jquery-dist&version=3.2.1', function(done) {
+  it('/info?package=https://github.com/jquery/jquery-dist.git&version=3.2.1', function(done) {
     request(app)
-      .get('/info?package=https://github.com/jquery/jquery-dist&version=3.2.1')
+      .get('/info?package=https://github.com/jquery/jquery-dist.git&version=3.2.1')
       .expect(200)
       .end(done);
   });
@@ -65,6 +71,12 @@ describe('app', function() {
     request(app)
         .get('/info?package=')
         .expect(400)
+        .end(done);
+  });
+  it('/info?package=https://cdn.jsdelivr.net/npm/hls.js@1.1.5/dist/hls.min.js', function(done) {
+    request(app)
+        .get('/info?package=https://cdn.jsdelivr.net/npm/hls.js@1.1.5/dist/hls.min.js')
+        .expect(200)
         .end(done);
   });
   it('/info', function(done) {
@@ -96,14 +108,14 @@ describe('app', function() {
   });
   it('/download with a url', function(done) {
     request(app)
-      .get('/download?package=https://github.com/PolymerElements/iron-behaviors&version=2.0.0')
+      .get('/download?package=https://github.com/PolymerElements/iron-behaviors.git&version=2.0.0')
       .expect(200)
       .expect('Content-Type', 'application/zip')
       .end(done);
   });
   it('/download with with dep version conflicts', function(done) {
     request(app)
-      .get('/download?package=https://github.com/vaadin/vaadin-grid&version=5.0.5')
+      .get('/download?package=https://github.com/vaadin/vaadin-grid.git&version=5.0.5')
       .expect(200)
       .expect('Content-Type', 'application/zip')
       .end(done);
