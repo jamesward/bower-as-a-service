@@ -32,17 +32,12 @@ describe('app', function() {
       .expect(200)
       .end(done);
   });
-
-  // doesn't seem to be a valid package name without the .git
-  /*
   it('/info with url', function(done) {
     request(app)
       .get('/info?package=https://github.com/PolymerElements/iron-behaviors&version=2.0.0')
       .expect(200)
       .end(done);
   });
-   */
-
   it('/info with url ending in .git', function(done) {
     request(app)
       .get('/info?package=https://github.com/PolymerElements/iron-behaviors.git&version=2.0.0')

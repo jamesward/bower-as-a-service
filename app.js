@@ -56,14 +56,18 @@ function fetchBowerInfo(packageName, version) {
 }
 
 function getBowerInfo(packageName, version) {
-  const endpoint = ((version !== undefined) && (version !== null) && (version.length > 0)) ? packageName + '#' + version : packageName;
+  const normalizaedPackageName = (packageName.startsWith("https://") &&
+      !packageName.endsWith(".git") &&
+      packageName.indexOf("@") === -1) ? packageName + ".git" : packageName;
+
+  const endpoint = ((version !== undefined) && (version !== null) && (version.length > 0)) ? normalizaedPackageName + '#' + version : normalizaedPackageName;
   const cacheKey = 'info:' + endpoint;
   const maybeInfoPromise = cache.get(cacheKey);
   if (maybeInfoPromise !== undefined) {
     return maybeInfoPromise;
   }
   else {
-    const bowerInfoPromise = fetchBowerInfo(packageName, version);
+    const bowerInfoPromise = fetchBowerInfo(normalizaedPackageName, version);
     bowerInfoPromise.catch(function() {
       cache.del(cacheKey);
     });
