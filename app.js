@@ -37,13 +37,13 @@ function fetchDetailedBowerInfo(packageName, version) {
 
     return util.promisify(fs.readFile)(bowerJsonFile).catch(function() {
       // fall back to the package.json
-      return util.promisify(fs.readFile)(packageJsonFile);
+      return util.promisify(fs.readFile)(packageJsonFile).catch(function () {
+        // fall back to empty
+        return {};
+      });
     })
     .then(function (buffer) {
       return JSON.parse(buffer.toString());
-    })
-    .catch(function() {
-      return {};
     })
     .then(function (json) {
       return Object.assign({}, json, pkgMeta);
@@ -56,23 +56,24 @@ function fetchBowerInfo(packageName, version) {
 }
 
 function getBowerInfo(packageName, version) {
-  const normalizaedPackageName = (packageName.startsWith("https://") &&
+  const normalizedPackageName = (packageName.startsWith("https://") &&
       !packageName.endsWith(".git") &&
       packageName.indexOf("@") === -1) ? packageName + ".git" : packageName;
 
-  const endpoint = ((version !== undefined) && (version !== null) && (version.length > 0)) ? normalizaedPackageName + '#' + version : normalizaedPackageName;
+  const endpoint = ((version !== undefined) && (version !== null) && (version.length > 0)) ? normalizedPackageName + '#' + version : normalizedPackageName;
   const cacheKey = 'info:' + endpoint;
-  const maybeInfoPromise = cache.get(cacheKey);
-  if (maybeInfoPromise !== undefined) {
-    return maybeInfoPromise;
+  const infoFromCache = cache.get(cacheKey);
+  if (infoFromCache !== undefined) {
+    return Promise.resolve(infoFromCache);
   }
   else {
-    const bowerInfoPromise = fetchBowerInfo(normalizaedPackageName, version);
-    bowerInfoPromise.catch(function() {
+    const bowerInfoPromise = fetchBowerInfo(normalizedPackageName, version);
+    return bowerInfoPromise.catch(function() {
       cache.del(cacheKey);
+    }).then(function (bowerInfo) {
+      cache.set(cacheKey, bowerInfo);
+      return bowerInfo;
     });
-    cache.set(cacheKey, bowerInfoPromise);
-    return bowerInfoPromise;
   }
 }
 
