@@ -16,7 +16,13 @@ const tmpDir = require('tmp').dirSync().name;
 
 function fetchBasicBowerInfo(packageName) {
   const info = require('bower/lib/commands/info');
-  return info(logger, packageName);
+  const packageInfo = info(logger, packageName);
+  if (packageInfo != null) {
+    return packageInfo;
+  }
+  else {
+    throw new Error(`Could not fetch basic info for ${packageName}`);
+  }
 }
 
 function fetchDetailedBowerInfo(packageName, version) {
@@ -56,9 +62,9 @@ function fetchBowerInfo(packageName, version) {
 }
 
 function getBowerInfo(packageName, version) {
-  const normalizedPackageName = (packageName.startsWith("https://") &&
-      !packageName.endsWith(".git") &&
-      packageName.indexOf("@") === -1) ? packageName + ".git" : packageName;
+  const normalizedPackageName = (packageName.startsWith('https://') &&
+      !packageName.endsWith('.git') &&
+      packageName.indexOf('@') === -1) ? packageName + '.git' : packageName;
 
   const endpoint = ((version !== undefined) && (version !== null) && (version.length > 0)) ? normalizedPackageName + '#' + version : normalizedPackageName;
   const cacheKey = 'info:' + endpoint;
@@ -71,8 +77,12 @@ function getBowerInfo(packageName, version) {
     return bowerInfoPromise.catch(function() {
       cache.del(cacheKey);
     }).then(function (bowerInfo) {
-      cache.set(cacheKey, bowerInfo);
-      return bowerInfo;
+      if (bowerInfo != null) {
+        cache.set(cacheKey, bowerInfo);
+        return bowerInfo;
+      } else {
+        throw new Error(`Bower Info was null for ${packageName} ${version}`)
+      }
     });
   }
 }
@@ -91,7 +101,12 @@ app.get('/info', function(req, res) {
   if ((req.query.package !== undefined) && (req.query.package !== null) && (req.query.package.length > 0)) {
     getBowerInfo(req.query.package, req.query.version)
         .then(function (data) {
-          res.json(data).end();
+          if (data != null) {
+            res.json(data).end();
+          }
+          else {
+            throw new Error(`getBowerInfo null for ${req.query.package} ${req.query.version}`)
+          }
         })
         .catch(function (error) {
           console.error(error);
@@ -99,7 +114,7 @@ app.get('/info', function(req, res) {
         });
   }
   else {
-    res.status(400).send("package query param not defined")
+    res.status(400).send('package query param not defined')
   }
 });
 
@@ -130,7 +145,7 @@ function fetchBowerDownload(packageInfoName, packageName, version) {
       return Promise.resolve(actualPackageDir);
     }
     else {
-      return Promise.reject(new Error("Package not downloaded"));
+      return Promise.reject(new Error('Package not downloaded'));
     }
   })
   .catch(function() {
@@ -148,7 +163,7 @@ function download(f) {
   return function(req, res) {
     const params = f(req);
     getBowerInfo(params.package, params.version).then(function (packageInfo) {
-      const version = packageInfo._target === "*" ? packageInfo._release : packageInfo._target;
+      const version = packageInfo._target === '*' ? packageInfo._release : packageInfo._target;
       return fetchBowerDownload(packageInfo.name, packageInfo._source, version)
         .then(function (dir) {
           const archiver = require('archiver');

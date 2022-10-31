@@ -9,12 +9,12 @@
     "ncu": "node node_modules/npm-check-updates/build/src/bin/cli.js -u"
   },
   "dependencies": {
-    "archiver": "5.3.0",
-    "body-parser": "1.19.2",
+    "archiver": "5.3.1",
+    "body-parser": "1.20.1",
     "bower": "1.8.14",
     "bower-endpoint-parser": "0.2.2",
     "bower-logger": "0.2.2",
-    "express": "4.17.3",
+    "express": "4.18.2",
     "node-cache": "5.1.2",
     "q": "1.5.1",
     "tmp": "0.2.1"
