@@ -62,6 +62,12 @@ describe('app', function() {
       .expect(200)
       .end(done);
   });
+  it('/info?package=jquery/jquery&version=1.0.1', function(done) {
+    request(app)
+        .get('/info?package=jquery/jquery&version=1.0.1')
+        .expect(200)
+        .end(done);
+  });
   it('/info?package=', function(done) {
     request(app)
         .get('/info?package=')

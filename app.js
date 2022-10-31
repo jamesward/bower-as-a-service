@@ -45,7 +45,7 @@ function fetchDetailedBowerInfo(packageName, version) {
       // fall back to the package.json
       return util.promisify(fs.readFile)(packageJsonFile).catch(function () {
         // fall back to empty
-        return {};
+        return "{}";
       });
     })
     .then(function (buffer) {
@@ -74,15 +74,16 @@ function getBowerInfo(packageName, version) {
   }
   else {
     const bowerInfoPromise = fetchBowerInfo(normalizedPackageName, version);
-    return bowerInfoPromise.catch(function() {
-      cache.del(cacheKey);
-    }).then(function (bowerInfo) {
+    return bowerInfoPromise.then(function (bowerInfo) {
       if (bowerInfo != null) {
         cache.set(cacheKey, bowerInfo);
         return bowerInfo;
       } else {
         throw new Error(`Bower Info was null for ${packageName} ${version}`)
       }
+    }).catch(function(e) {
+      cache.del(cacheKey);
+      throw e;
     });
   }
 }
