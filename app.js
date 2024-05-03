@@ -160,6 +160,8 @@ function fetchBowerDownload(packageInfoName, packageName, version) {
   });
 }
 
+
+
 function download(f) {
   return function(req, res) {
     const params = f(req);
@@ -169,6 +171,8 @@ function download(f) {
         .then(function (dir) {
           const archiver = require('archiver');
           const archive = archiver('zip');
+          archive.pipe(res);
+
           archive.directory(dir, false);
 
           archive.on('error', function (err) {
@@ -177,7 +181,6 @@ function download(f) {
 
           res.attachment(params.package + '.zip');
 
-          archive.pipe(res);
           archive.finalize();
         })
     })
