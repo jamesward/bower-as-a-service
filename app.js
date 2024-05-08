@@ -139,28 +139,22 @@ function packageDir(packageName, version) {
   return path.join(tmpDir, packageName, version);
 }
 
-function fetchBowerDownload(packageInfoName, packageName, version) {
+async function fetchBowerDownload(packageInfoName, packageName, version) {
   const actualPackageDir = path.join(packageDir(packageName, version), 'bower_components', packageInfoName);
-  return util.promisify(fs.stat)(actualPackageDir).then(function(fileStat) {
-    if (fileStat.isDirectory()) {
-      return Promise.resolve(actualPackageDir);
-    }
-    else {
-      return Promise.reject(new Error('Package not downloaded'));
-    }
-  })
-  .catch(function() {
-    const endpoint = packageName + '#' + version;
+
+  const fileStat = await util.promisify(fs.stat)(actualPackageDir).catch(() => null);
+  if (fileStat != null && fileStat.isDirectory()) {
+    return actualPackageDir;
+  }
+  else {
+    const endpoint = `${packageName}#${version}`;
     const install = require('bower/lib/commands/install');
-    const options = {forceLatest: true, production: true};
-    const config = {cwd: packageDir(packageName, version), argv: {cooked: []}};
-    return install(logger, [endpoint], options, config).then(function(installInfo) {
-      return installInfo[packageInfoName].canonicalDir;
-    });
-  });
+    const options = { forceLatest: true, production: true };
+    const config = { cwd: packageDir(packageName, version), argv: { cooked: [] } };
+    const installInfo = await install(logger, [endpoint], options, config);
+    return installInfo[packageInfoName].canonicalDir;
+  }
 }
-
-
 
 function download(f) {
   return function(req, res) {
